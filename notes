@@ -1,0 +1,94 @@
+C204 | map bank
+C240 | C330 (8 bytes)
+C300 | map camera x (+1)
+C302 | map camera x (+1) (previous, used to know if need update)
+C301 | map camera y (+1)
+C303 | map camera y (+1) (previous, ^)
+C304 | map cursor x (+1)
+C305 | map cursor y (+1)
+C306 | addr of tileset tilemap?
+C310 | general purpose x?
+C314 | general purpose y?
+C330 | (8 bytes)
+C360 | some script addr
+C368 | some script bank
+C419 | save slot
+C800 | metatile grid
+D080 | cgb palettes?
+D100 | something actor?
+D200 | actor(?)
+D400 | unit stats?
+DA00 | volatile attributes grid
+
+DA00 bits
+bit 3 = limit view tile
+
+A000 | 1E (30dec) blue unit stats ($20 per unit, first $10 same as D400 entries)
+
+save data map: (s = A400 or AA00) (hopefully I did math right)
+s+0000 (A400) => "RXMBSH" (6 bytes)
+s+0006 (A406) => C330 (9 bytes)
+s+000F (A40F) => C203 (1 byte) map number
+s+0010 (A410) => C447 (1 byte)
+s+0011 (A411) => C448 (1 byte)
+s+0012 (A412) => C449 (1 byte)
+s+0013 (A413) => C44A (1 byte)
+s+0014 (A414) => C44B (1 byte)
+s+0015 (A415) => C350 (1 byte)
+s+0016 (A416) => C24A (1 byte)
+s+0017 (A417) => C220 (1 byte)
+s+0018 (A418) => C222 (1 byte)
+s+0019 (A419) => C480 (60 bytes)
+s+0100 (A500) => D100 (100 bytes)
+s+0200 (A600) => A000 (400 bytes) player unit stats
+
+01:4048 palette addrs
+
+B5 maps
+01:4058 map banks
+01:410D map palettte addrs
+01:4277 map grid addrs
+01:43E1 map terrain tms
+01:454B map graphic lists addrs
+01:46B5 map something units addrs
+01:481F map terrain addrs
+
+15:6C34 map 1
+
+actor:
++00 | b | flags
++01 | w | x position (pixels)
++03 | w | y position (pixels)
++05 ...
++08 | b | idk
++09 ...
++0A | b | something indexing D100 (not loaded if 0?)
++0B ...
++0E | b | x position (squares)
++0F | b | y position (squares)
+
+unit stat:
++00 | b | pid
++01 | b | jid
++02 | b | exp
++03 | b | level
++04 | b | ?
++05 | b | max hp
++06 | b | attack
++07 | b | skill
++08 | b | speed
++09 | b | luck
++0A | b | defense
++0B | b | resistance
++0C | b | ? (0xFF)
++0D | b | ?
++0E | b | ? (0xFF)
++0F | b | cur hp
+
+some script:
+hd | what?
+00 | set map number (b@+01) + set C330 (data@+02)
+01 | memcpy (dst:w@+01 len:w@+03 data@+05)
+02 | 
+03 | calls a func
+FE | yield

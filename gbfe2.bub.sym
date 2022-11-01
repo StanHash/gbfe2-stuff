@@ -1,0 +1,345 @@
+; this is meant as an input file for bub for generating a disassembly
+; not as any kind of reference
+
+; io
+00:FF00 rJOYP
+00:FF04 rDIV
+00:FF05 rTIMA
+00:FF06 rTMA
+00:FF07 rTAC
+00:FF0F rIF
+00:FF25 rAUDTERM
+00:FF40 rLCDC
+00:FF41 rSTAT
+00:FF42 rSCY
+00:FF43 rSCX
+00:FF44 rLY
+00:FF45 rLYC
+00:FF46 rDMA
+00:FF47 rBGP
+00:FF48 rOBP0
+00:FF49 rOBP1
+00:FF4A rWY
+00:FF4B rWX
+00:FF4D rSPD
+00:FF4F rVBK
+00:FF68 rBCPS
+00:FF6A rOCPS
+00:FF70 rSVBK
+00:FFFF rIE
+
+; entry points
+00:0040 .code ; int 40 (vblank)
+00:0048 .code ; int 48 (stat)
+; 00:0050 .code ; int 50 (timer) ; broken
+00:0058 .code ; int 58 (serial)
+00:0060 .code ; int 60 (joypad)
+00:0100 .code ; entry
+
+; bank
+00:0702 .bank 1  ; 01
+00:071B .bank 1  ; 01
+00:0BC1 .bank 5  ; 05
+00:0EF4 .bank 10 ; 0A
+00:119C .bank 59 ; 3B
+00:119F .bank 59 ; 3B
+00:11BE .bank 59 ; 3B
+00:11DD .bank 59 ; 3B
+00:11E6 .bank 59 ; 3B
+00:11E9 .bank 59 ; 3B
+00:1444 .bank 3  ; 03
+00:15F3 .bank 4  ; 04
+00:15F9 .bank 8  ; 08
+00:1678 .bank 5  ; 05
+00:177C .bank 8  ; 08
+00:17DE .bank 3  ; 03
+00:183A .bank 4  ; 04
+00:183D .bank 4  ; 04
+00:186D .bank 4  ; 04
+00:1878 .bank 3  ; 03
+00:18B5 .bank 5  ; 05
+00:18B8 .bank 5  ; 05
+00:18BB .bank 5  ; 05
+00:18C1 .bank 5  ; 05
+00:18C4 .bank 5  ; 05
+00:192B .bank 4  ; 04
+00:195B .bank 8  ; 08
+00:1979 .bank 5  ; 05
+00:198F .bank 5  ; 05
+00:199A .bank 5  ; 05
+00:19A0 .bank 5  ; 05
+00:19AC .bank 5  ; 05
+00:1A33 .bank 8  ; 08
+00:1A49 .bank 4  ; 04
+00:1AE6 .bank 5  ; 05
+00:1D4B .bank 3  ; 03
+00:1F40 .bank 4  ; 04
+00:21A4 .bank 4  ; 04
+00:2360 .bank 4  ; 04
+00:23A2 .bank 4  ; 04
+00:23C9 .bank 4  ; 04
+00:23D7 .bank 4  ; 04
+00:241E .bank 4  ; 04
+00:2589 .bank 4  ; 04
+00:2592 .bank 4  ; 04
+00:259B .bank 4  ; 04
+00:2747 .bank 4  ; 04
+00:275E .bank 4  ; 04
+00:2839 .bank 1  ; 01
+00:284A .bank 62 ; 3E
+00:2852 .bank 63 ; 3F
+00:2881 .bank 5  ; 05
+00:2E0F .bank 5  ; 05
+00:2E15 .bank 8  ; 08
+00:2E37 .bank 5  ; 05
+00:2E62 .bank 5  ; 05
+00:2E8B .bank 5  ; 05
+00:2E91 .bank 8  ; 08
+00:2EC0 .bank 4  ; 04
+
+; addr operands
+00:0065 .addr ; => 00:0070 (code)
+00:01DF .addr ; => rBCPS
+00:01EA .addr ; => rOCPS
+00:0BC1 .addr ; => 05:42E0 (grid "w * y" lut)
+00:1569 .addr ; => 00:1578 (call table)
+00:16C9 .addr ; => 00:1C5C (code)
+00:1792 .addr ; => 00:17A1 (call table)
+00:1931 .addr ; => 00:197F (call table)
+00:1A8D .addr ; => 00:1A9C (call table)
+00:1C6E .addr ; => 00:C347
+00:1D7B .addr ; => 00:FF68 (rBCPS)
+00:21AA .addr ; => 00:21B6 (call table)
+00:2366 .addr ; => 00:2372 (call table)
+00:25A1 .addr ; => 00:25AD (jump table)
+00:2764 .addr ; => 00:2770 (jump table)
+00:282F .addr ; => 00:DFFF
+00:2A7B .addr ; => 00:2A91 (call table)
+00:2B06 .addr ; => 00:2BBE (call table)
+00:2B12 .addr ; => 00:0ADB (code)
+00:2B6E .addr ; => 00:2B7A (jump table)
+00:2BE9 .addr ; => 00:2C18 (jump table)
+00:2BF8 .addr ; => 00:2C10 (call table)
+00:2FDC .addr ; => 00:2FEB (jump table)
+00:30A0 .addr ; => 00:0ADB (code)
+00:30A6 .addr ; => 00:30B5 (jump table)
+00:313F .addr ; => 00:0ADB (code)
+00:3145 .addr ; => 00:3154 (jump table)
+00:31DE .addr ; => 00:0ADB (code)
+00:31E4 .addr ; => 00:31F3 (jump table)
+
+; indirect code
+00:0070 .code ; xref at 00:0065
+00:0ADB .code ; xref at 00:30A0, 00:313F
+00:1C5C .code ; xref at 00:16C9
+
+; jump and call tables
+; 00:1578 .jtda 8 ; xref at 00:1569
+00:1588 .code ; ct 00:1578 entry 0
+00:1589 .code ; ct 00:1578 entry 1
+00:16AF .code ; ct 00:1578 entry 2
+00:15A5 .code ; ct 00:1578 entry 3
+00:1650 .code ; ct 00:1578 entry 4
+00:167C .code ; ct 00:1578 entry 5
+00:16DD .code ; ct 00:1578 entry 6
+00:1588 .code ; ct 00:1578 entry 7
+; 00:17A1 .jtda 8 ; xref at 00:1792
+00:17B1 .code ; ct 00:17A1 entry 0
+00:1870 .code ; ct 00:17A1 entry 1
+00:17B1 .code ; ct 00:17A1 entry 2
+00:187B .code ; ct 00:17A1 entry 3
+00:1905 .code ; ct 00:17A1 entry 4
+00:19F2 .code ; ct 00:17A1 entry 5
+00:1840 .code ; ct 00:17A1 entry 6
+00:17B2 .code ; ct 00:17A1 entry 7
+; 00:197F .jtda 5 ; xref at 00:1931
+00:1989 .code ; ct 00:197F entry 0
+00:19BA .code ; ct 00:197F entry 1
+00:19BA .code ; ct 00:197F entry 2
+00:19BB .code ; ct 00:197F entry 3
+00:19DA .code ; ct 00:197F entry 4
+; 00:1A9C .jtda 8 ; xref at 00:1A8D
+00:1AAC .code ; ct 00:1A9C entry 0
+00:1AAC .code ; ct 00:1A9C entry 1
+00:1AAC .code ; ct 00:1A9C entry 2
+00:1AAD .code ; ct 00:1A9C entry 3
+00:1AE3 .code ; ct 00:1A9C entry 4
+00:1AE3 .code ; ct 00:1A9C entry 5
+00:1B00 .code ; ct 00:1A9C entry 6
+00:1AE3 .code ; ct 00:1A9C entry 7
+; 00:21B6 .jtda 3 ; xref at 00:21AA
+00:21BC .code ; ct 00:21B6 entry 0
+00:21C9 .code ; ct 00:21B6 entry 1
+00:21C9 .code ; ct 00:21B6 entry 2
+; 00:2372 .jtda 4 ; xref at 00:2366
+00:237A .code ; ct 00:2372 entry 0
+00:238D .code ; ct 00:2372 entry 1
+00:2393 .code ; ct 00:2372 entry 2
+00:23A5 .code ; ct 00:2372 entry 3
+; 00:25AD .jtda 4 ; xref at 00:25A1
+00:25B5 .code ; jt 00:25AD entry 0
+00:25CE .code ; jt 00:25AD entry 1
+00:25E8 .code ; jt 00:25AD entry 2
+00:25EE .code ; jt 00:25AD entry 3
+; 00:2770 .jtda 3 ; xref at 00:2764
+00:2776 .code ; jt 00:2770 entry 0
+00:278A .code ; jt 00:2770 entry 1
+00:278A .code ; jt 00:2770 entry 2
+; 00:2A91 .jtda 4 ; xref at 00:2A7B
+00:2A99 .code ; ct 00:2A91 entry 0
+00:2ABC .code ; ct 00:2A91 entry 1
+00:2ABD .code ; ct 00:2A91 entry 2
+00:2B3E .code ; ct 00:2A91 entry 3
+; 00:2B7A .jtda 4 ; xref at 00:2B6E
+00:2B82 .code ; jt 00:2B7A entry 0
+00:2B90 .code ; jt 00:2B7A entry 1
+00:2B9E .code ; jt 00:2B7A entry 2
+00:2BAE .code ; jt 00:2B7A entry 3
+; 00:2BBE .jtda 4 ; xref at 00:2B06
+00:2BC6 .code ; ct 00:2BBE entry 0
+00:2BCE .code ; ct 00:2BBE entry 1
+00:2BD6 .code ; ct 00:2BBE entry 2
+00:2BDE .code ; ct 00:2BBE entry 3
+; got too lazy to count entries
+; 00:2C10
+00:2C20 .code
+00:2C4F .code
+00:2C70 .code
+00:2C91 .code
+; 00:2C18
+00:2C47 .code
+00:2C66 .code
+00:2C87 .code
+00:2CA8 .code
+; 00:2FEB
+00:2FFB .code
+00:301D .code
+00:2FBE .code
+00:305B .code
+00:3074 .code
+00:2FFB .code
+00:2FFB .code
+00:2FFB .code
+; 00:30B5
+00:30C5 .code
+00:30CF .code
+00:2FBE .code
+00:30FD .code
+00:3113 .code
+00:30C5 .code
+00:30C5 .code
+00:30C5 .code
+; 00:3154 .jtda 8 ; xref at 00:3145
+00:3164 .code ; jt 00:3154 entry 0
+00:316E .code ; jt 00:3154 entry 1
+00:2FBE .code ; jt 00:3154 entry 2
+00:31A2 .code ; jt 00:3154 entry 3
+00:31B2 .code ; jt 00:3154 entry 4
+00:3164 .code ; jt 00:3154 entry 5
+00:3164 .code ; jt 00:3154 entry 6
+00:3164 .code ; jt 00:3154 entry 7
+; 00:31F3
+00:3203 .code
+00:320D .code
+00:2FBE .code
+00:3241 .code
+00:3251 .code
+00:3203 .code
+00:3203 .code
+00:3203 .code
+01:5871 .code ; ct 01:4008 entry 0 (bt 01:4000 entry 0)
+02:4FAB .code ; ct 01:4008 entry 1 (bt 01:4000 entry 1)
+02:556F .code ; ct 01:4008 entry 2 (bt 01:4000 entry 2)
+2A:4B39 .code ; ct 01:4008 entry 3 (bt 01:4000 entry 3)
+02:55A5 .code ; ct 01:4008 entry 4 (bt 01:4000 entry 4)
+02:5DCD .code ; ct 01:4008 entry 5 (bt 01:4000 entry 5)
+03:600F .code ; ct 01:4008 entry 6 (bt 01:4000 entry 6)
+02:758D .code ; ct 01:4008 entry 7 (bt 01:4000 entry 7)
+01:5892 .code ; ct 01:4018 entry 0 (bt 01:4000 entry 0)
+02:4FF3 .code ; ct 01:4018 entry 1 (bt 01:4000 entry 1)
+02:5598 .code ; ct 01:4018 entry 2 (bt 01:4000 entry 2)
+2A:4BD4 .code ; ct 01:4018 entry 3 (bt 01:4000 entry 3)
+02:55D9 .code ; ct 01:4018 entry 4 (bt 01:4000 entry 4)
+02:5DFA .code ; ct 01:4018 entry 5 (bt 01:4000 entry 5)
+03:602C .code ; ct 01:4018 entry 6 (bt 01:4000 entry 6)
+02:75C6 .code ; ct 01:4018 entry 7 (bt 01:4000 entry 7)
+
+; comments (to help with proper annotations later on)
+00:2833 .comment hl = 2000 (rROMB0)
+00:2837 .comment hl = 3000 (rROMB1)
+00:283A .comment hl = 6000 (??)
+00:3FAE .comment hl = 7000 (??)
+
+; rom0 names
+00:0000 AddHl2A
+00:0007 AddHlA
+00:000E LdwHl
+00:0012 CallViaHl
+00:0013 FarCallViaHl
+00:0061 InitOamDma
+00:0070 OamDma
+00:0150 SyncScroll
+00:0184 PollKeys
+00:01CC ClearWram
+00:01D7 ClearPalettes
+00:020B MemFill
+00:0215 MemCopy
+00:021F MemFillVideo
+00:022A MemCopyVideo
+00:023E WriteByteVideo
+00:0801 SetBank1
+00:08D5 GetUnitMaxHp_08D5
+00:08E2 GetUnitHp_08E2
+00:0A29 GetCamera
+00:0AA1 GetGridSquareTm
+00:0AB8 GetLimitViewSquareTm
+00:0B36 PutGridSquare
+00:0BAE GetGridOffset
+00:0EEF LoadSavedProgress
+00:1C6A SetFunc_1C6A
+00:1D43 ClearMoveGrid
+00:27DE SetBank8
+00:27E7 SetBank4
+00:27F0 SetBank5
+00:27F9 SetBank3
+00:2802 SetMapBank
+00:2815 SwapBank
+00:2819 Entry
+00:2841 OnVBlank
+00:2860 OnStat
+00:28A9 GetActor_28A9
+00:28BA GetActor_28BA
+00:28CB GetActor_28CB
+00:2CB2 GetUnit_2CB2
+00:2CC3 GetUnit_2CC3
+00:2F6D GetPlayerUnit_2F6D
+05:6F67 SramCheck
+
+; wram names
+00:C200 wCurrentBank
+00:C203 wMapNumber
+00:C204 wMapBank
+00:C306 wTilesetTm
+00:C307 wTilesetTm+1 ; NOTE: cheating
+00:C210 wKeys
+00:C212 wKeysPrev
+00:C213 wKeysPressed
+00:C240 wSCX
+00:C242 wSCY
+00:C248 wGridWidth
+00:C249 wGridHeight
+00:C27A wWY
+00:C27B wWX
+00:C300 wCameraX
+00:C301 wCameraY
+00:C310 wWorkX
+00:C314 wWorkY
+00:C344 wUnkC344
+00:C345 wUnkC344+1 ; NOTE: cheating
+00:C347 wFunc
+00:C348 wFunc+1 ; NOTE: cheating
+00:C419 wSaveSlot
+
+; hram names
+00:FF80 hOamDma
+00:FFFE hIsCgb
