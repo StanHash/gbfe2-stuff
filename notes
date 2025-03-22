@@ -1,4 +1,10 @@
+C000 | cycled shadow oam
+C100 | wOam
+C201 | some id? (indexes 01:4000, which is bank going in C202)
+C202 | a bank
 C204 | map bank
+C207 | oam cycling offset
+C21B | a func addr (bank: C202)
 C240 | C330 (8 bytes)
 C300 | map camera x (+1)
 C302 | map camera x (+1) (previous, used to know if need update)
@@ -10,10 +16,15 @@ C306 | addr of tileset tilemap?
 C310 | general purpose x?
 C314 | general purpose y?
 C330 | (8 bytes)
+C350 | cursor control mode? (1 = dungeon move, 2 = can't move?, 3 = map cursor, 4 = unit move, 5 = attack target select)
 C360 | some script addr
 C368 | some script bank
 C419 | save slot
+C500 |
+C680 |
 C800 | metatile grid
+D000 | cgb BG palettes
+D040 | cgb OB palettes
 D080 | cgb palettes?
 D100 | something actor?
 D200 | actor(?)
@@ -42,6 +53,10 @@ s+0019 (A419) => C480 (60 bytes)
 s+0100 (A500) => D100 (100 bytes)
 s+0200 (A600) => A000 (400 bytes) player unit stats
 
+01:4000 palette+ banks? 01 02 02 2A 02 02 03 02
+01:4008 ?
+
+01;4038 some other addrs
 01:4048 palette addrs
 
 B5 maps
@@ -53,17 +68,24 @@ B5 maps
 01:46B5 map something units addrs
 01:481F map terrain addrs
 
+03:5B2E addrs indexed by world
+03:5B40 addrs indexed by world
+03:5B52 addrs indexed by world
+
 15:6C34 map 1
 
 actor:
-+00 | b | flags
++00 | b | flags (bit 0 = ?, bit 1 = ?, bit 2 = not displayed, bit 3 = ?, bit 7 = moved/don't animate?)
 +01 | w | x position (pixels)
 +03 | w | y position (pixels)
-+05 ...
-+08 | b | idk
-+09 ...
++05 | b | bit 0 = graphics loaded in vram
++06 | b | sprite ID?
++07 | b | 
++08 | b | idk something about animation/facing
++09 | b | 
 +0A | b | something indexing D100 (not loaded if 0?)
 +0B ...
++0C | b | ? indexes some world stuff
 +0E | b | x position (squares)
 +0F | b | y position (squares)
 
@@ -87,8 +109,52 @@ unit stat:
 
 some script:
 hd | what?
-00 | set map number (b@+01) + set C330 (data@+02)
+00 | set map number (b@+01) + set 8 bytes at C330 (data@+02)
 01 | memcpy (dst:w@+01 len:w@+03 data@+05)
 02 | 
 03 | calls a func
+04 | 
+05 | 
+06 | 
+07 | 
+08 | 
+09 | 
+0A | 
+0B | 
+0C | 
 FE | yield
+
+
+screen patches:
+    sequence of:
+        +00 | b | width (0 == terminator)
+        +01 | b | height
+        +02 | b | vram addr hi
+        +04 | b | vram bank (is attr map). these should be last in list as early items aren't 
+
+bank 6 & 7 map sprites (bank 6: overworld, bank 7: battle map)
+B4000+ (bank 0x2D+) banim sprite graphics
+
+Code_3FA3 input format
+head byte = message size - 3
+messages bytes
+some last byte?
+
+
+put text:
+C403 | b | text frame height (in tiles)
+C404
+C405 | b | character width in dots (= 12? always)
+C406 | b | text frame width (in tiles)
+C407 | b | text tile number
+C408 | b | text bank
+C409 | b | glyph bank (internal)
+C40A | w | text addr
+C40C
+C410 | b | glyph dot x (internal)
+C411 | b | glyph dot y (internal)
+C412 | b | bits to OR to bitplanes (internal)
+C414 | b | bitplane line (0..7)
+C415 | b | character number offset (macro line: dot_y / 8) (internal)
+C416 | b | character dot x
+C417 | b | character dot y

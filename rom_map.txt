@@ -1,0 +1,87 @@
+reminder: addresses are in the form bank:addr
+bank is which $4000 byte section
+the address falls in, and addr is a number:
+    between 0 and $3FFF for bank 0
+    between $4000 and $7FFF for bank 1+ (ROM offset = bank * $4000 + (addr - $4000))
+
+00:0000 home code
+00:3FD4 blank
+
+01:4000 screen tables
+01:4058 map tables
+01:4C5D screen 0 data
+01:580D screen 0 code
+01:58CD blank
+01:5B37 some code (init/main?)
+01:5B7D blank
+
+02:4000 bank 2 oam address table
+02:4022 screen 1 & 4 data
+02:4E1A bank 2 oam data
+02:4FAB screen 1 code
+02:5242 screen 2 data
+02:556F screen 2 code
+02:55A5 screen 4 code
+02:5610 screen 5 data
+02:5DCD screen 5 code
+02:5F2D screen 7 data
+02:758D screen 7 code
+02:782F blank
+
+03:4000 bank 3 oam address table
+03:402E bank 3 oam data
+03:4185 code
+03:4356 dungeon actor callback table addresses. indxed by actor +0A
+03:442C individual dungeon actor callback tables and their callback code
+03:5608 unrolled ClearMoveGrid (funny long)
+03:5B09 world related code
+03:5B2E world tables
+03:5C82 screen 6 data
+03:600F screen 6 code
+03:6042 blank
+
+04:4000 numbers and other symbols bitmaps
+04:41C0 loader code for 04:4000
+04:41D5 PID name address table (bank: 25)
+04:428B JID name address table (bank: 25)
+04:43F5 JID something list (pair of JID, something else)
+04:4422 code (lots)
+04:7262 blank
+
+05:4000 bank 5 oam address table
+05:400C bank 5 oam data
+05:41B6 some byte table related to 05:41BE (number of range tiles)
+05:41BE some byte pair list (coordinates of range tiles?)
+05:42E0 blank
+05:436? TODO (unknown)
+05:6482 code
+05:7609 blank
+
+06:4000 something actor sprites
+07:4000 something actor sprites
+
+08:4000
+
+09:4000 map data (00 ... 09)
+0A:4000 map data (0B ... 12)
+0B:4000 map data (13 ... 1A)
+...
+1D:4000 map data (B2 ... B4)
+
+1E:4000 ?
+
+25:5809 character name strings (addressed by 04:41D5)
+
+27:4000 character glyphs (000..1FF)
+28:4000 character glyphs (200..3FF)
+29:4000 character glyphs (400..5FF)
+
+2D:4000 seems to be banim actor graphics
+
+3B:4000 code (unknown)
+
+3E:4000 code (audio?)
+3E:4FD9 blank
+
+3F:4000 code (audio?) some of it is broken
+3F:7AEE blank

@@ -8,7 +8,15 @@
 00:FF06 rTMA
 00:FF07 rTAC
 00:FF0F rIF
+00:FF10 rAUD1SWEEP
+00:FF12 rAUD1ENV
+00:FF14 rAUD1HIGH
+00:FF17 rAUD2ENV
+00:FF19 rAUD2HIGH
+00:FF1A rAUD3ENA
+00:FF24 rAUDVOL
 00:FF25 rAUDTERM
+00:FF26 rAUDENA
 00:FF40 rLCDC
 00:FF41 rSTAT
 00:FF42 rSCY
@@ -28,6 +36,9 @@
 00:FF70 rSVBK
 00:FFFF rIE
 
+00:038A .comment LOW(rBCPS)
+00:0392 .comment LOW(rOCPS)
+
 ; entry points
 00:0040 .code ; int 40 (vblank)
 00:0048 .code ; int 48 (stat)
@@ -39,8 +50,17 @@
 ; bank
 00:0702 .bank 1  ; 01
 00:071B .bank 1  ; 01
+00:0921 .bank 4  ; 04
 00:0BC1 .bank 5  ; 05
 00:0EF4 .bank 10 ; 0A
+00:1123 .bank 59 ; 3B
+00:1126 .bank 59 ; 3B
+00:1148 .bank 59 : 3B
+00:114E .bank 42 ; 2A
+00:115A .bank 59 ; 3B
+00:1160 .bank 42 ; 2A
+00:11B4 .bank 42 ; 2A
+00:1175 .bank 59 ; 3B
 00:119C .bank 59 ; 3B
 00:119F .bank 59 ; 3B
 00:11BE .bank 59 ; 3B
@@ -97,10 +117,15 @@
 00:2E91 .bank 8  ; 08
 00:2EC0 .bank 4  ; 04
 
+00:17D3 .bank 8  ; 08
+
 ; addr operands
 00:0065 .addr ; => 00:0070 (code)
 00:01DF .addr ; => rBCPS
 00:01EA .addr ; => rOCPS
+00:05C7 .addr ; => 00:05EE (some $100 byte table (rand lut?))
+00:05DC .addr ; => 00:05EE (some $100 byte table (rand lut?))
+00:0707 .addr ; => 01:4000 (palette banks)
 00:0BC1 .addr ; => 05:42E0 (grid "w * y" lut)
 00:1569 .addr ; => 00:1578 (call table)
 00:16C9 .addr ; => 00:1C5C (code)
@@ -127,11 +152,56 @@
 00:3145 .addr ; => 00:3154 (jump table)
 00:31DE .addr ; => 00:0ADB (code)
 00:31E4 .addr ; => 00:31F3 (jump table)
+00:3CF6 .addr ; => 00:3D00 (code)
+02:559F .addr ; => 00:08EF (code)
+00:17D3 .addr
+
+00:1723 .addr ; => rOCPS
+
+00:2A30 .addr ; => wActorA
+00:2606 .addr
+
+00:094B .addr ; => wKeysPressed
+00:0956 .addr ; => wKeysPressed
+00:0961 .addr ; => wKeysPressed
+00:096C .addr ; => wKeysPressed
 
 ; indirect code
 00:0070 .code ; xref at 00:0065
 00:0ADB .code ; xref at 00:30A0, 00:313F
 00:1C5C .code ; xref at 00:16C9
+
+00:3822 .code
+00:3841 .code
+00:3D00 .code
+
+; unreferenced code?
+00:026F .code
+00:026F WaitForKeyPress_026F
+00:059A .code
+00:059A Func_Unref_059A
+00:08EF .code
+00:08EF Code_08EF
+00:0A0A .code
+00:0A0A Func_Unref_0A0A
+00:0FD0 .code
+00:0FD0 AddHl5A
+00:0FDE .code
+00:0FE8 .code
+00:1005 .code
+00:1043 .code
+00:1098 .code ; just a ret
+00:1099 .code
+00:10AB .code
+00:1164 .code
+00:11A9 .code
+00:121A .code
+00:1545 .code
+00:167B .code ; just a ret
+00:19DD .code ; just a ret
+00:1CA8 .code
+00:1D06 .code
+00:1D38 .code
 
 ; jump and call tables
 ; 00:1578 .jtda 8 ; xref at 00:1569
@@ -279,6 +349,7 @@
 00:0061 InitOamDma
 00:0070 OamDma
 00:0150 SyncScroll
+00:0169 ClearOam
 00:0184 PollKeys
 00:01CC ClearWram
 00:01D7 ClearPalettes
@@ -286,8 +357,17 @@
 00:0215 MemCopy
 00:021F MemFillVideo
 00:022A MemCopyVideo
+00:0236 WaitForBlank
+00:024B ReadByteVideo
+00:0256 ReadByteVideoDE
 00:023E WriteByteVideo
+00:0261 MemCopyVideo2Video
+00:044E PutSprite
+00:0546 PrepareOam
+00:07A6 LoadTileMap
+00:07DF LoadTileSet
 00:0801 SetBank1
+00:080A SetScreenBank
 00:08D5 GetUnitMaxHp_08D5
 00:08E2 GetUnitHp_08E2
 00:0A29 GetCamera
@@ -296,34 +376,87 @@
 00:0B36 PutGridSquare
 00:0BAE GetGridOffset
 00:0EEF LoadSavedProgress
+00:0FC7 AddHl3A
 00:1C6A SetFunc_1C6A
-00:1D43 ClearMoveGrid
+00:1D43 ClearAttributeGrid
 00:27DE SetBank8
 00:27E7 SetBank4
 00:27F0 SetBank5
 00:27F9 SetBank3
 00:2802 SetMapBank
+00:280C SetBank3_2
 00:2815 SwapBank
 00:2819 Entry
 00:2841 OnVBlank
 00:2860 OnStat
-00:28A9 GetActor_28A9
-00:28BA GetActor_28BA
-00:28CB GetActor_28CB
-00:2CB2 GetUnit_2CB2
-00:2CC3 GetUnit_2CC3
+00:28A9 GetActorA
+00:28BA GetActorC
+00:28CB GetActorB
+00:2CB2 GetUnitA
+00:2CC3 GetUnitC
+00:2CD4 GetUnitB
 00:2F6D GetPlayerUnit_2F6D
+00:3488 PutText_3488
+00:34E4 IncrementTextPointer
+00:35BB ClearText_35BB
+00:3676 PutTextCharacter
 05:6F67 SramCheck
+03:5B13 GetMapWorldID
+
+00:18E2 BackupActorPosition
+
+00:06EE ShowScreen
+00:176A HandleButtonStart
+00:176B HandleButtonSelect
+00:1780 HandleButtonA
+00:1A7F HandleButtonB
+00:17B1 HandleButtonA_None
+00:17B2 HandleButtonA_7
+00:1840 HandleButtonA_6
+00:1870 HandleButtonA_DungeonMode
+00:187B HandleButtonA_CursorMode
+00:1905 HandleButtonA_UnitMode
+00:19F2 HandleButtonA_AttackMode
+00:28DC FindWorkPositionActor
+
+; renaming this to know that it does indeed set bank 4
+00:26F1 Code_26F1_SetBank4
+
+00:36DA GetTextDot_36DA
+00:3730 WriteTextDot_3730
+
+00:3725 .comment mask
+
+00:C409 wTextGlyphsBank
+00:C40C wTextGlyphsAddr
+00:C40D wTextGlyphsAddr+1
 
 ; wram names
+00:C100 wOam
 00:C200 wCurrentBank
+00:C201 wScreenNumber
+00:C202 wScreenBank
 00:C203 wMapNumber
 00:C204 wMapBank
+00:C231 wSpriteX
+00:C232 wSpriteX+1 ; NOTE: cheating
+00:C233 wSpriteY
+00:C234 wSpriteY+1 ; NOTE: cheating
+00:C235 wOamIt
+00:C236 wSpriteTile
+00:C237 wSpriteAttr
+00:C238 wOamX
+00:C239 wOamX+1 ; NOTE: cheating
+00:C23A wOamY
+00:C23B wOamY+1 ; NOTE: cheating
+00:C304 wMapCursorX
+00:C305 wMapCursorY
 00:C306 wTilesetTm
 00:C307 wTilesetTm+1 ; NOTE: cheating
 00:C210 wKeys
 00:C212 wKeysPrev
 00:C213 wKeysPressed
+00:C230 wSpriteID
 00:C240 wSCX
 00:C242 wSCY
 00:C248 wGridWidth
@@ -333,13 +466,479 @@
 00:C300 wCameraX
 00:C301 wCameraY
 00:C310 wWorkX
+00:C312 wWorkX_2
 00:C314 wWorkY
+00:C316 wWorkY_2
 00:C344 wUnkC344
 00:C345 wUnkC344+1 ; NOTE: cheating
 00:C347 wFunc
 00:C348 wFunc+1 ; NOTE: cheating
 00:C419 wSaveSlot
+00:C42C wSavedActorX
+00:C42E wSavedActorY
+00:C435 wSavedActorFrame
+00:C351 wActorA
+00:C352 wActorB
+00:C353 wActorC
+
+; seems to be overlay?
+; 00:C411 wTextDotY
 
 ; hram names
 00:FF80 hOamDma
 00:FFFE hIsCgb
+
+00:072D .addr
+
+00:3676 .comment b = head byte
+
+03:42D3 .addr
+
+00:1B61 .code
+00:1B65 .code
+00:1B69 .code
+00:1B6D .code
+
+00:1D91 Code_1D91
+00:1D91 .code
+00:1DAB .bank 8
+00:1E14 .bank 5
+00:1E17 .bank 5
+00:1DD7 .bank 5
+00:1E24 .bank 8
+00:1E3C .bank 5
+00:1EF3 .bank 4
+00:1EFC .bank 4
+00:1F4B .bank 4
+00:1F51 .bank 4
+00:1F54 .bank 4
+00:2026 .bank 3
+00:2060 .bank 3
+00:212C .bank 4
+00:21E2 .bank 4
+00:23B1 .bank 4
+00:2400 .bank 4
+00:240C .bank 4
+00:2424 .bank 4
+00:243B .bank 4
+00:245F .bank 4
+00:24AF .bank 4
+00:24E9 .bank 8
+00:2511 .bank 4
+00:251D .bank 4
+00:2520 .bank 4
+00:252A .bank 8
+00:2600 .bank 4
+00:2646 .bank 4
+00:3D7A .bank 4
+00:3E2C .bank 5
+00:3E44 .bank 8
+00:3E54 .bank 8
+00:3E5E .bank 4
+
+00:1E57 .code
+00:1E57 Code_Unref_1E57
+00:1E6D .code
+00:1E6D Code_1E6D
+05:75AB .addr ; => Code_1E6D
+00:1E87 .code
+00:1E87 Code_Unref_1E87
+00:1EA7 .code
+00:1EA7 Code_Unref_1EA7
+00:1ECA .code
+00:1ECA Code_Unref_1ECA
+00:1EED .code
+00:1EED Code_Unref_1EED
+00:1EF6 .code
+00:1EF6 Code_Unref_1EF6
+00:1F43 .code
+00:1F4E .code
+00:1F57 .code
+00:2277 .code
+00:22EA .code
+00:2304 .code
+00:230A .code
+00:23A8 .code
+00:23F1 .code
+00:2403 .code
+00:2421 .code
+00:25F1 .code
+00:2632 .code
+00:26A2 .code
+00:26B3 .code
+00:278D .code
+00:279F .code
+00:2F7F .code
+00:3482 .code
+00:37D0 .code
+00:37D0 Code_Unref_37D0
+00:3984 .code
+00:3984 Code_3984
+00:3D73 .code
+00:3DF7 .code
+00:3E51 .code
+00:3E57 .code
+00:3E95 .code
+00:3E9E .code
+00:3EC1 .code
+00:3EE6 .code
+00:3EFB .code
+00:3FC6 .code
+
+00:244D .jtda 3
+00:2612 .jtda 3
+00:2658 .jtda 3
+
+00:264C .addr ; => 00:2658
+
+01:5B5E .code
+
+02:4FFD .addr
+02:5008 .addr
+02:5013 .addr
+02:501E .addr
+02:5029 .addr
+02:5034 .addr
+02:50A9 .addr
+04:59BD .addr
+
+08:59BA .code
+08:59BA Code_08_59BA
+04:44F0 .code
+04:44F0 Code_04_44F0
+
+00:17D9 GetWorldAddr_17D9
+00:2022 GetWorldAddr_2022
+00:205C GetWorldAddr_205C
+
+02:7647 .code
+
+05:6724 .code
+
+04:6DD1 .jtda 2
+04:6EF7 .jtda 2
+04:6F2B .code
+
+; dungeon actor callbacks
+03:442E .code
+03:442E DungeonActorCallback_00_0
+03:4466 .code
+03:4466 DungeonActorCallback_01_0
+03:447D .code
+03:447D DungeonActorCallback_01_1
+03:44A9 .code
+03:44A9 DungeonActorCallback_01_2
+03:44D5 .code
+03:44D5 DungeonActorCallback_01_3
+03:4501 .code
+03:4501 DungeonActorCallback_01_4
+03:4518 .code
+03:4518 DungeonActorCallback_01_5
+03:4548 .code
+03:4548 DungeonActorCallback_02_0
+03:4574 .code
+03:4574 DungeonActorCallback_02_1
+03:45A4 .code
+03:45A4 DungeonActorCallback_03_0
+03:45BB .code
+03:45BB DungeonActorCallback_03_1
+03:45D6 .code
+03:45D6 DungeonActorCallback_04_0
+03:45ED .code
+03:45ED DungeonActorCallback_04_1
+03:460A .code
+03:460A DungeonActorCallback_05_0
+03:4621 .code
+03:4621 DungeonActorCallback_05_1
+03:4638 .code
+03:4638 DungeonActorCallback_05_2
+03:4666 .code
+03:4666 DungeonActorCallback_06_0
+03:4694 .code
+03:4694 DungeonActorCallback_07_0
+03:46C4 .code
+03:46C4 DungeonActorCallback_08_0
+03:46DB .code
+03:46DB DungeonActorCallback_08_1
+03:4709 .code
+03:4709 DungeonActorCallback_09_0
+03:4722 .code
+03:4722 DungeonActorCallback_0A_0
+03:4750 .code
+03:4750 DungeonActorCallback_0B_0
+03:4769 .code
+03:4769 DungeonActorCallback_0C_0
+03:4782 .code
+03:4782 DungeonActorCallback_0D_0
+03:479B .code
+03:479B DungeonActorCallback_0E_0
+03:47B4 .code
+03:47B4 DungeonActorCallback_0F_0
+03:47CD .code
+03:47CD DungeonActorCallback_10_0
+03:47E6 .code
+03:47E6 DungeonActorCallback_11_0
+03:4801 .code
+03:4801 DungeonActorCallback_12_0
+03:4818 .code
+03:4818 DungeonActorCallback_12_1
+03:4846 .code
+03:4846 DungeonActorCallback_13_0
+03:4874 .code
+03:4874 DungeonActorCallback_14_0
+03:48A2 .code
+03:48A2 DungeonActorCallback_15_0
+03:48D0 .code
+03:48D0 DungeonActorCallback_16_0
+03:48FE .code
+03:48FE DungeonActorCallback_17_0
+03:4917 .code
+03:4917 DungeonActorCallback_18_0
+03:4930 .code
+03:4930 DungeonActorCallback_19_0
+03:4949 .code
+03:4949 DungeonActorCallback_1A_0
+03:4977 .code
+03:4977 DungeonActorCallback_1B_0
+03:4990 .code
+03:4990 DungeonActorCallback_1C_0
+03:49C0 .code
+03:49C0 DungeonActorCallback_1D_0
+03:49D7 .code
+03:49D7 DungeonActorCallback_1D_1
+03:4A07 .code
+03:4A07 DungeonActorCallback_1E_0
+03:4A1E .code
+03:4A1E DungeonActorCallback_1E_1
+03:4A4C .code
+03:4A4C DungeonActorCallback_1F_0
+03:4A7A .code
+03:4A7A DungeonActorCallback_20_0
+03:4A7A .code
+03:4A7A DungeonActorCallback_21_0
+03:4A93 .code
+03:4A93 DungeonActorCallback_22_0
+03:4ABC .code
+03:4ABC DungeonActorCallback_23_0
+03:4AD5 .code
+03:4AD5 DungeonActorCallback_24_0
+03:4AEE .code
+03:4AEE DungeonActorCallback_25_0
+03:4B07 .code
+03:4B07 DungeonActorCallback_26_0
+03:4B20 .code
+03:4B20 DungeonActorCallback_27_0
+03:4B39 .code
+03:4B39 DungeonActorCallback_28_0
+03:4B52 .code
+03:4B52 DungeonActorCallback_29_0
+03:4B6F .code
+03:4B6F DungeonActorCallback_2A_0
+03:4B86 .code
+03:4B86 DungeonActorCallback_2A_1
+03:4BB2 .code
+03:4BB2 DungeonActorCallback_2A_2
+03:4BCB .code
+03:4BCB DungeonActorCallback_2B_0
+03:4BF9 .code
+03:4BF9 DungeonActorCallback_2C_0
+03:4C27 .code
+03:4C27 DungeonActorCallback_2D_0
+03:4C55 .code
+03:4C55 DungeonActorCallback_2E_0
+03:4C83 .code
+03:4C83 DungeonActorCallback_2F_0
+03:4C9C .code
+03:4C9C DungeonActorCallback_30_0
+03:4CB5 .code
+03:4CB5 DungeonActorCallback_31_0
+03:4CCE .code
+03:4CCE DungeonActorCallback_32_0
+03:4CFC .code
+03:4CFC DungeonActorCallback_33_0
+03:4D2A .code
+03:4D2A DungeonActorCallback_34_0
+03:4D47 .code
+03:4D47 DungeonActorCallback_35_0
+03:4D5E .code
+03:4D5E DungeonActorCallback_35_1
+03:4D8A .code
+03:4D8A DungeonActorCallback_35_2
+03:4DA3 .code
+03:4DA3 DungeonActorCallback_36_0
+03:4DD1 .code
+03:4DD1 DungeonActorCallback_37_0
+03:4DFF .code
+03:4DFF DungeonActorCallback_38_0
+03:4E1A .code
+03:4E1A DungeonActorCallback_39_0
+03:4E46 .code
+03:4E46 DungeonActorCallback_39_1
+03:4E74 .code
+03:4E74 DungeonActorCallback_3A_0
+03:4EA2 .code
+03:4EA2 DungeonActorCallback_3B_0
+03:4ED2 .code
+03:4ED2 DungeonActorCallback_3C_0
+03:4EE9 .code
+03:4EE9 DungeonActorCallback_3C_1
+03:4F04 .code
+03:4F04 DungeonActorCallback_3D_0
+03:4F1B .code
+03:4F1B DungeonActorCallback_3D_1
+03:4F36 .code
+03:4F36 DungeonActorCallback_3E_0
+03:4F4D .code
+03:4F4D DungeonActorCallback_3E_1
+03:4F68 .code
+03:4F68 DungeonActorCallback_3F_0
+03:4F7F .code
+03:4F7F DungeonActorCallback_3F_1
+03:4F98 .code
+03:4F98 DungeonActorCallback_40_0
+03:4FB1 .code
+03:4FB1 DungeonActorCallback_41_0
+03:4FCA .code
+03:4FCA DungeonActorCallback_42_0
+03:4FE3 .code
+03:4FE3 DungeonActorCallback_43_0
+03:4FFC .code
+03:4FFC DungeonActorCallback_44_0
+03:5015 .code
+03:5015 DungeonActorCallback_45_0
+03:502E .code
+03:502E DungeonActorCallback_46_0
+03:5047 .code
+03:5047 DungeonActorCallback_47_0
+03:5060 .code
+03:5060 DungeonActorCallback_48_0
+03:5079 .code
+03:5079 DungeonActorCallback_49_0
+03:50A7 .code
+03:50A7 DungeonActorCallback_4A_0
+03:50C0 .code
+03:50C0 DungeonActorCallback_4B_0
+03:50D9 .code
+03:50D9 DungeonActorCallback_4C_0
+03:50F2 .code
+03:50F2 DungeonActorCallback_4D_0
+03:5126 .code
+03:5126 DungeonActorCallback_4E_0
+03:515A .code
+03:515A DungeonActorCallback_4F_0
+03:518E .code
+03:518E DungeonActorCallback_50_0
+03:51C2 .code
+03:51C2 DungeonActorCallback_51_0
+03:51F6 .code
+03:51F6 DungeonActorCallback_52_0
+03:522A .code
+03:522A DungeonActorCallback_53_0
+03:525E .code
+03:525E DungeonActorCallback_54_0
+03:5292 .code
+03:5292 DungeonActorCallback_55_0
+03:52C6 .code
+03:52C6 DungeonActorCallback_56_0
+03:52FA .code
+03:52FA DungeonActorCallback_57_0
+03:532E .code
+03:532E DungeonActorCallback_58_0
+03:5362 .code
+03:5362 DungeonActorCallback_59_0
+03:5396 .code
+03:5396 DungeonActorCallback_5A_0
+03:53CA .code
+03:53CA DungeonActorCallback_5B_0
+03:53FE .code
+03:53FE DungeonActorCallback_5C_0
+03:5432 .code
+03:5432 DungeonActorCallback_5D_0
+03:5466 .code
+03:5466 DungeonActorCallback_5E_0
+03:549A .code
+03:549A DungeonActorCallback_5F_0
+03:54C3 .code
+03:54C3 DungeonActorCallback_60_0
+03:54EC .code
+03:54EC DungeonActorCallback_61_0
+03:5515 .code
+03:5515 DungeonActorCallback_62_0
+03:553E .code
+03:553E DungeonActorCallback_63_0
+03:5567 .code
+03:5567 DungeonActorCallback_64_0
+03:5590 .code
+03:5590 DungeonActorCallback_65_0
+03:55B9 .code
+03:55B9 DungeonActorCallback_66_0
+03:55BC .code
+03:55BC DungeonActorCallback_67_0
+03:55BF .code
+03:55BF DungeonActorCallback_68_0
+03:55D8 .code
+03:55D8 DungeonActorCallback_69_0
+03:55F1 .code
+03:55F1 DungeonActorCallback_6A_0
+
+04:41C0 .code
+04:41D1 .comment BUG: no way this needs to be a video copy
+
+04:5A6A .code
+
+04:5F88 .jtda 5
+04:654E .jtda 2
+04:66FE .jtda 3
+04:6794 .jtda 3
+04:68B5 .jtda 3
+04:69EF .jtda 2
+04:6DD1 .jtda 2
+05:66DC .jtda 9
+05:6FE1 .jtda 7
+
+04:6A0E .code
+04:6A43 .code
+04:6A78 .code
+04:6AAD .code
+04:6B51 .code
+04:6B76 .code
+04:6C0B .code
+04:6C42 .code
+04:6CA0 .code
+05:71A9 .code
+
+00:1D4B ClearAttributeGridFar
+03:5608 ClearAttributeGridUnrolled
+
+02:513E .addr
+03:4240 .addr
+03:42F0 .addr
+03:4346 .addr
+05:6486 .addr
+
+00:3D00 Code_3D00
+00:0ADB Code_0ADB
+00:2421 Code_2421
+
+05:6482 ClearAttributeGrid_05_6482
+
+00:2CF2 PutActorsOnAttributeGrid
+
+3E:4044 .addr
+3E:4047 .addr
+
+; bank 3F doesn't make sense!
+
+3F:799F .code
+3F:79A3 .code
+
+3F:4135 .addr
+3F:4096 .jtda 50
+
+3F:799F .code
+3F:7992 .code
+
+3F:53D9 .dontfollow
+3F:541F .dontfollow
+
+00:0FF2 SetBank3B
